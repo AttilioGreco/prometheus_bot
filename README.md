@@ -2,6 +2,21 @@
 
 This bot is designed to alert messages from [alertmanager](https://github.com/prometheus/alertmanager).
 
+## Run in docker
+1. create your template /etc/template.tm
+2. create your config.yaml
+
+3. build container
+   working dir ../prometheus_bot
+```
+   docker build .
+
+```
+4. run container
+```
+docker run --restart=always -d -p 9087:9087 -v /path_host/config.yaml:/root/config.yaml -v /path_mytemplate/mytemplate.tmpl:/root/template.tmpl my_image_id
+```
+
 ## Compile
 
 [GOPATH related doc](https://golang.org/doc/code.html#GOPATH).
