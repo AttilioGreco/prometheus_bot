@@ -1,0 +1,37 @@
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: template
+  namespace: monitoring
+data:
+  template.tmpl: |
+    {{if eq .Status "firing" -}}
+    <b>Status</b>: <i>{{.Status | str_UpperCase}} 🔥</i>
+    {{end -}}
+    {{if eq .Status "resolved" -}}
+    Status: <b>{{.Status | str_UpperCase}} ✅</b>
+    {{end -}}
+    {{ $length := len .CommonLabels -}}
+    {{ if ne $length 0 -}}
+    <b>Common Labels:</b>
+    {{ range $key,$val := .CommonLabels -}}
+    <b>{{$key}}</b>: <code>{{$val}}</code>
+    {{ end -}} {{ end -}}
+    <b>Active Alert List:</b>
+    {{- range $val := .Alerts }}
+    
+    <b>Alert:</b> {{if $val.Labels.alert_name}} {{ $val.Labels.alert_name | str_UpperCase }} {{else if $val.Labels.alertname }} {{ $val.Labels.alertname | str_UpperCase }} {{else}} No alert_name or alertname LABELS {{end}}
+    {{if $val.Labels.instance}} <b>Instance:</b> {{ $val.Labels.instance | str_UpperCase }} {{end}}
+    {{$severity := index $val.Labels "severity" -}}
+    {{if eq $severity "warning" -}}
+    <b>Severity:</b> {{$severity}} ⚠️
+    {{- else if eq $severity "critical" -}}
+    <b>Severity:</b> {{$severity}} 🚨
+    {{- else -}}
+    <b>Severity:</b> {{$severity}}
+    {{- end -}}
+    {{- range $key, $value := $val.Annotations }}
+    <b>{{$key}}:</b> {{$value}}
+    {{- end }}
+    {{- end -}}

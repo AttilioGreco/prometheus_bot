@@ -1,0 +1,51 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus-telegram
+  namespace: monitoring
+  labels:
+    app: prometheus-telegram
+spec:
+  replicas: 0
+  selector:
+    matchLabels:
+      app: prometheus-telegram
+  template:
+    metadata:
+      labels:
+        app: prometheus-telegram
+    spec:
+      restartPolicy: Always
+      containers:
+      - name: prometheus-bot
+        image: attiliogreco96/prometheus_bot:latest
+        command: [ "/root/prometheus_bot","-c","/etc/config/config.yaml", "-t", "/etc/templates/template.tmpl" ]
+        resources:
+          limits:
+            memory: 200Mi
+            cpu: 200m
+          requests:
+            memory: 75Mi
+            cpu: 100m
+        ports:
+        - containerPort: 9087
+          name: telegram-bot
+          protocol: TCP
+        volumeMounts:
+        - name: config
+          mountPath: /etc/config
+        - name: template
+          mountPath: /etc/templates
+      volumes:
+      - name: config
+        configMap:
+          defaultMode: 256
+          optional: false
+          name: config
+      - name: template
+        configMap:
+          defaultMode: 256
+          optional: false
+          name: template
+
